@@ -1,20 +1,28 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-
-interface SignInData {
-  userName?: string;
-  password?: string;
-}
+import type { SignIn } from "../types/signIn.types";
+import { signInService } from "../service/signIn.service";
 
 function SignIn() {
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<SignInData>();
+  } = useForm<SignIn>();
+  const navigation = useNavigate();
+  const onSubmit = async (data: SignIn) => {
+    try {
+      const response = await signInService(data);
 
-  const onSubmit = (data: SignInData) => {
-    console.log(data);
+      console.log("response", response);
+      if (response?.access_token) {
+        localStorage.setItem("token", response?.access_token);
+        navigation("/home");
+      }
+    } catch (error: any) {
+      console.log("error", error);
+      alert(error?.response?.data?.message || "SignIn failed");
+    }
   };
 
   return (
@@ -30,27 +38,23 @@ function SignIn() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
+              Email
             </label>
             <input
               type="text"
-              placeholder="Enter your username"
-              {...register("userName", {
-                required: "Username is required",
+              placeholder="Enter your email"
+              {...register("email", {
+                required: "Email is required",
                 minLength: {
                   value: 3,
-                  message: "Username must be at least 3 characters",
-                },
-                maxLength: {
-                  value: 16,
-                  message: "Username must be at most 16 characters",
+                  message: "Email must be at least 3 characters",
                 },
               })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
             />
-            {errors?.userName && (
+            {errors?.email && (
               <p className="text-sm text-red-500 mt-1">
-                {errors.userName.message as string}
+                {errors.email.message as string}
               </p>
             )}
           </div>

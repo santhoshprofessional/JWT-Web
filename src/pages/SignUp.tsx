@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
+import { signUpService } from "../service/signUp.service";
 interface SignUp {
   userName?: string;
   email?: string;
@@ -7,14 +8,26 @@ interface SignUp {
   confirmPassword?: string;
 }
 function SignUp() {
+  const navigate = useNavigate();
   const {
     control,
     handleSubmit,
     getValues,
     formState: { errors },
   } = useForm<SignUp>();
-  const submit = (data: SignUp) => {
-    console.log(data);
+  const submit = async (data: SignUp) => {
+    try {
+      const modifiedData = {
+        userName: data.userName,
+        email: data.email,
+        password: data.password,
+      };
+      const response = await signUpService(modifiedData);
+      alert(response.message);
+      navigate("/");
+    } catch (error: any) {
+      alert(error.response?.data?.message || "Signup failed");
+    }
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
