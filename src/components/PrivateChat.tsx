@@ -9,6 +9,11 @@ const PrivateChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
+  useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected:", socket.id);
     });
